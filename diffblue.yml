@@ -1,0 +1,334 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+ - target:
+   - dir: cli/target/classes
+     file: hudson/cli/HexDump.class
+     sourceDir: cli/src/main/java
+     sourceFile: hudson/cli/HexDump.java
+ - target:
+   - dir: core/target/classes
+     file: jenkins/org/apache/commons/validator/routines/DomainValidator.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/org/apache/commons/validator/routines/DomainValidator.java
+   - dir: core/target/classes
+     file: jenkins/org/apache/commons/validator/routines/DomainValidator$ArrayType.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/org/apache/commons/validator/routines/DomainValidator.java
+   - dir: core/target/classes
+     file: jenkins/org/apache/commons/validator/routines/DomainValidator$IDNBUGHOLDER.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/org/apache/commons/validator/routines/DomainValidator.java
+   - dir: core/target/classes
+     file: jenkins/org/apache/commons/validator/routines/RegexValidator.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/org/apache/commons/validator/routines/RegexValidator.java
+ - target:
+   - dir: core/target/classes
+     file: hudson/console/ConsoleNote.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/console/ConsoleNote.java
+   - dir: core/target/classes
+     file: jenkins/util/SystemProperties.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/util/SystemProperties.java
+   - dir: core/target/classes
+     file: hudson/util/Iterators.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/util/Iterators.java
+   - dir: core/target/classes
+     file: hudson/FilePath$FileCallableWrapper.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/FilePath.java
+   - dir: core/target/classes
+     file: jenkins/util/JenkinsJVM.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/util/JenkinsJVM.java
+   - dir: core/target/classes
+     file: hudson/PluginManager.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/PluginManager.java
+   - dir: core/target/classes
+     file: hudson/util/AtomicFileWriter.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/util/AtomicFileWriter.java
+   - dir: core/target/classes
+     file: hudson/util/UnbufferedBase64InputStream.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/util/UnbufferedBase64InputStream.java
+   - dir: core/target/classes
+     file: jenkins/util/SystemProperties$Listener.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/util/SystemProperties.java
+   - dir: core/target/classes
+     file: hudson/Util.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/Util.java
+   - dir: core/target/classes
+     file: hudson/console/ConsoleAnnotator.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/console/ConsoleAnnotator.java
+   - dir: core/target/classes
+     file: jenkins/security/HMACConfidentialKey.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/security/HMACConfidentialKey.java
+   - dir: core/target/classes
+     file: jenkins/security/DefaultConfidentialStore.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/security/DefaultConfidentialStore.java
+   - dir: core/target/classes
+     file: hudson/Lookup.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/Lookup.java
+   - dir: core/target/classes
+     file: hudson/FilePath$FileCallable.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/FilePath.java
+   - dir: core/target/classes
+     file: hudson/ExtensionList$1.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/ExtensionList.java
+   - dir: core/target/classes
+     file: hudson/MarkupText.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/MarkupText.java
+   - dir: core/target/classes
+     file: jenkins/model/Jenkins.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/model/Jenkins.java
+   - dir: core/target/classes
+     file: hudson/util/IOUtils.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/util/IOUtils.java
+   - dir: core/target/classes
+     file: jenkins/model/Jenkins$JenkinsHolder.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/model/Jenkins.java
+   - dir: core/target/classes
+     file: hudson/util/AdaptedIterator.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/util/AdaptedIterator.java
+   - dir: core/target/classes
+     file: hudson/FilePath.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/FilePath.java
+   - dir: core/target/classes
+     file: hudson/FilePath$FileCallableWrapperFactory.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/FilePath.java
+   - dir: core/target/classes
+     file: hudson/util/FileChannelWriter.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/util/FileChannelWriter.java
+   - dir: core/target/classes
+     file: hudson/util/TextFile.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/util/TextFile.java
+   - dir: core/target/classes
+     file: jenkins/security/ConfidentialStore.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/security/ConfidentialStore.java
+   - dir: core/target/classes
+     file: jenkins/security/ConfidentialKey.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/security/ConfidentialKey.java
+   - dir: core/target/classes
+     file: hudson/ExtensionList$Lock.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/ExtensionList.java
+   - dir: core/target/classes
+     file: hudson/console/ConsoleAnnotationDescriptor.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/console/ConsoleAnnotationDescriptor.java
+   - dir: core/target/classes
+     file: hudson/model/Descriptor.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/model/Descriptor.java
+   - dir: core/target/classes
+     file: hudson/ExtensionList.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/ExtensionList.java
+   - dir: core/target/classes
+     file: hudson/PluginStrategy.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/PluginStrategy.java
+   - dir: core/target/classes
+     file: hudson/util/Iterators$5.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/util/Iterators.java
+   - dir: core/target/classes
+     file: jenkins/SlaveToMasterFileCallable.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/SlaveToMasterFileCallable.java
+   - dir: core/target/classes
+     file: hudson/FilePath$SecureFileCallable.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/FilePath.java
+   - dir: core/target/classes
+     file: hudson/FilePath$Chmod.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/FilePath.java
+ - target:
+   - dir: core/target/classes
+     file: jenkins/util/MemoryReductionUtil.class
+     sourceDir: core/src/main/java
+     sourceFile: jenkins/util/MemoryReductionUtil.java
+   - dir: core/target/classes
+     file: hudson/Util.class
+     sourceDir: core/src/main/java
+     sourceFile: hudson/Util.java
